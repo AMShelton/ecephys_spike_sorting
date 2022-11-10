@@ -632,8 +632,8 @@ class processing_session():
         return dirname
         
     def sorted_dirname(self, probe):
-        dirname_parts = self.raw_dirname(probe).split('_')
-        session_name = ('_').join(dirname_parts[0:3])
+        dirname_parts = self.raw_dirname(probe).split('_probe')
+        session_name = dirname_parts[0]
         dirname = session_name+'_probe'+self.probe_letter(probe)+'_'+'sorted'
         return dirname
 
