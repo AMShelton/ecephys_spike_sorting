@@ -1,4 +1,4 @@
-addpath(genpath('C:\Users\andrew.shelton\Documents\GitHub\kilosort3')) % path to kilosort folder
+addpath(genpath('C:\Users\andrew.shelton\Documents\GitHub\Kilosort2')) % path to kilosort folder
 addpath(genpath('C:\Users\andrew.shelton\Documents\GitHub\npy-matlab')) % path to npy-matlab scripts
 
 pathToYourConfigFile = 'C:\Users\andrew.shelton\Documents\MATLAB'; % take from Github folder and put it somewhere else (together with the master_file)
