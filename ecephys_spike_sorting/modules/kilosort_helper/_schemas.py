@@ -14,7 +14,7 @@ class KilosortParameters(DefaultSchema):
 class Kilosort2Parameters(DefaultSchema):
 
     trange = String(required=False, default='[0 Inf]', help='Time range in seconds to process')
-    fproc = String(required=False, default="fullfile('C:/data/kilosort', 'temp_wh.dat')", help='Processed data file on a fast ssd')
+    fproc = String(required=False, default="fullfile('A:/data/kilosort', 'temp_wh.dat')", help='Processed data file on a fast ssd')
   
     chanMap = String(required=False, default="'chanMap.mat'", help='path to channel map .mat file')
     fshigh = Int(required=False, default=150, help='frequency for high pass filtering')
@@ -43,7 +43,7 @@ class Kilosort2Parameters(DefaultSchema):
 class Kilosort25Parameters(DefaultSchema):
 
     trange = String(required=False, default='[0 Inf]', help='Time range in seconds to process')
-    fproc = String(required=False, default="fullfile('C:/data/kilosort', 'temp_wh.dat')", help='Processed data file on a fast ssd')
+    fproc = String(required=False, default="fullfile('A:/data/kilosort', 'temp_wh.dat')", help='Processed data file on a fast ssd')
   
     chanMap = String(required=False, default="'chanMap.mat'", help='path to channel map .mat file')
     fshigh = Int(required=False, default=150, help='frequency for high pass filtering')
@@ -72,7 +72,7 @@ class Kilosort25Parameters(DefaultSchema):
 class Kilosort3Parameters(DefaultSchema):
 
     trange = String(required=False, default='[0 Inf]', help='Time range in seconds to process')
-    fproc = String(required=False, default="fullfile('D:/data/kilosort', 'temp_wh.dat')", help='Processed data file on a fast ssd')
+    fproc = String(required=False, default="fullfile('A:/data/kilosort', 'temp_wh.dat')", help='Processed data file on a fast ssd')
   
     chanMap = String(required=False, default="'chanMap.mat'", help='path to channel map .mat file')
     fshigh = Int(required=False, default=300, help='frequency for high pass filtering')
@@ -103,7 +103,7 @@ class Kilosort3Parameters(DefaultSchema):
 class KilosortUltraParameters(DefaultSchema):
 
     trange = String(required=False, default='[0 Inf]', help='Time range in seconds to process')
-    fproc = String(required=False, default="fullfile('C:/data/kilosort', 'temp_wh.dat')", help='Processed data file on a fast ssd')
+    fproc = String(required=False, default="fullfile('A:/data/kilosort', 'temp_wh.dat')", help='Processed data file on a fast ssd')
   
     chanMap = String(required=False, default="'chanMap.mat'", help='path to channel map .mat file')
     fshigh = Int(required=False, default=300, help='frequency for high pass filtering')
