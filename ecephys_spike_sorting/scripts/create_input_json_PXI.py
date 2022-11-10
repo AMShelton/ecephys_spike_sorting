@@ -27,14 +27,14 @@ def createInputJson(npx_directory, output_file, extracted_data_directory = None,
 		"settings_xml": settings_xml,
 		"probe_json" : probe_json,
 
-		"npx_extractor_executable": "C:\\Users\\svc_neuropix\\Documents\\GitHub\\npxextractor\\NpxExtractor\\Release\\NpxExtractor.exe",
-		"npx_extractor_repo": "C:\\Users\\svc_neuropix\\Documents\\GitHub\\npxextractor",
+		"npx_extractor_executable": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\npxextractor\\NpxExtractor\\Release\\NpxExtractor.exe",
+		"npx_extractor_repo": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\npxextractor",
 
-	    "median_subtraction_executable": "C:\\Users\\svc_neuropix\\Documents\\GitHub\\spikebandmediansubtraction\\Builds\\VisualStudio2013\\Release\\SpikeBandMedianSubtraction.exe",
-	    "median_subtraction_repo": "C:\\Users\\svc_neuropix\\Documents\\GitHub\\spikebandmediansubtraction\\",
+	    "median_subtraction_executable": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\spikebandmediansubtraction\\Builds\\VisualStudio2013\\Release\\SpikeBandMedianSubtraction.exe",
+	    "median_subtraction_repo": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\spikebandmediansubtraction\\",
 
-	    "kilosort_location": "C:\\Users\\svc_neuropix\\Documents\\MATLAB",
-	    "kilosort_repo": "C:\\Users\\svc_neuropix\\Documents\\GitHub\\kilosort2",
+	    "kilosort_location": "C:\\Users\\andrew.shelton\\Documents\\MATLAB",
+	    "kilosort_repo": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\kilosort2",
 	    "kilosort_version" : 2,
 	    "surface_channel_buffer" : 15,
 
@@ -110,7 +110,7 @@ def createInputJson(npx_directory, output_file, extracted_data_directory = None,
 		},
 
 		"noise_waveform_params" : {
-			"classifier_path" : "C:\\Users\\svc_neuropix\\Documents\\GitHub\\ecephys_spike_sorting\\ecephys_spike_sorting\\modules\\noise_templates\\classifier.pkl"
+			"classifier_path" : "C:\\Users\\andrew.shelton\\Documents\\GitHub\\ecephys_spike_sorting\\ecephys_spike_sorting\\modules\\noise_templates\\classifier.pkl"
 
 		},
 

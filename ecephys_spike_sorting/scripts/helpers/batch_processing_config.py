@@ -13,16 +13,16 @@ config = {
     'network_backup': r'\\allen\programs\mindscope\workgroups\np-exp', #r"C:\Users\svc_neuropix\Desktop\1128517077_565581_20210915_quality_metrics", #r\\10.128.54.19\sd9,
     'start_module': 'extract_from_npx',
     'end_module': 'cleanup', # 'final_copy_parallel', #'cleanup',
-    'json_directory': r'C:\Users\svc_neuropix\Documents\json_files',
+    'json_directory': r'C:\Users\andrew.shelton\Documents\json_files',
     'ctx_surface_min': 80,
     'ctx_surface_max': 240,
     'slot_config':{
     	2:{
-    		'acq_drive':  r'\\W10DT05501\A',
+    		'acq_drive':  r'\\W10DT713931\A',
     		'suffix': 'probeABC',
     	},
     	3:{
-    		'acq_drive': r'\\W10DT05501\B',
+    		'acq_drive': r'\\W10DT713931\B',
     		'suffix': 'probeDEF',
     	},
         # 2:{

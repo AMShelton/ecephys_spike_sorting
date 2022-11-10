@@ -8,8 +8,8 @@ sorted_directories = [r'E:\test_2019-07-25_18-16-48_probeA_sorted']
 
 probe_type = 'PXI'
 
-json_directory = r'C:\Users\svc_neuropix\Documents\json_files'#'/mnt/md0/data/json_files'
-#json_directory = r'C:\Users\svc_neuropix\Documents\json_files'
+json_directory = r'C:\Users\andrew.shelton\Documents\json_files'#'/mnt/md0/data/json_files'
+#json_directory = r'C:\Users\andrew.shelton\Documents\json_files'
 
 for directory in sorted_directories:
 

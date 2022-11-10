@@ -10,7 +10,7 @@ npx_directories = [r'N:\715093703_386129_20180627'
 
 probe_type = '3A'
 
-json_directory = r'C:\Users\svc_neuropix\Documents\json_files'
+json_directory = r'C:\Users\andrew.shelton\Documents\json_files'
 
 
 def copy_to_local(source, destination):

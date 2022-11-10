@@ -50,7 +50,7 @@ class processing_session():
         default_backup2 = os.path.join(r'\\10.128.50.43\sd6.3', session_name)
         default_start = 'extract_from_npx'
         default_end = 'cleanup'
-        self.json_directory = r'C:\Users\svc_neuropix\Documents\json_files'
+        self.json_directory = r'C:\Users\andrew.shelton\Documents\json_files'
 
 
         session_name2 = "1046581736_527294_20200827"

@@ -14,9 +14,9 @@ logging.basicConfig(level = logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 file_name1 = 'all_'+datetime.datetime.now().strftime("%y.%m.%d.%I.%M.%S")+".log"
-log_file1 = os.path.join(r'C:\Users\svc_neuropix\Documents\log_files',file_name1)
+log_file1 = os.path.join(r'C:\Users\andrew.shelton\Documents\log_files',file_name1)
 file_name2 = 'err_'+datetime.datetime.now().strftime("%y.%m.%d")+".log"
-log_file2 = os.path.join(r'C:\Users\svc_neuropix\Documents\log_files',file_name2)
+log_file2 = os.path.join(r'C:\Users\andrew.shelton\Documents\log_files',file_name2)
 file_handler1 = logging.FileHandler(log_file1)
 file_handler2 = logging.FileHandler(log_file2)
 

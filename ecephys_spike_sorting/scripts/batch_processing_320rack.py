@@ -13,7 +13,7 @@ local_data_path = r'C:\data'
 
 probe_type = '3A'
 
-json_directory = r'C:\Users\svc_neuropix\json_files'
+json_directory = r'C:\Users\andrew.shelton\json_files'
 
 for mouse in mice:
 

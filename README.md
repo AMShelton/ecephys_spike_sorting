@@ -132,7 +132,7 @@ To leave the pipenv virtual environment, simply type:
   location in the newly-created 'sorting' env:
 ```
 cd (fullfile(matlabroot,'extern','engines','python'))
-system('C:\Users\svc_neuropix\Anaconda3\envs\sorting\python.exe setup.py install')
+system('C:\Users\andrew.shelton\Anaconda3\envs\sorting\python.exe setup.py install')
 ```
 - confirm installation by launching python and running:
 ```

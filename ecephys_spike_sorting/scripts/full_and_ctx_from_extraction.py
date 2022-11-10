@@ -11,10 +11,10 @@ if __name__ == '__main__':
     session_name = sys.argv[1]
   except Exception as E:
     print('No arguments found in sys call, using session name from py file instead')
-  command_string_1 = r"python C:\Users\svc_neuropix\Documents\GitHub\ecephys_spike_sorting\ecephys_spike_sorting\scripts\cortex_from_extraction.py "+session_name
+  command_string_1 = r"python C:\Users\andrew.shelton\Documents\GitHub\ecephys_spike_sorting\ecephys_spike_sorting\scripts\cortex_from_extraction.py "+session_name
   subprocess.check_output(command_string_1)
 
-  command_string_2 = r"python C:\Users\svc_neuropix\Documents\GitHub\ecephys_spike_sorting\ecephys_spike_sorting\scripts\full_from_kilosort.py "+session_name
+  command_string_2 = r"python C:\Users\andrew.shelton\Documents\GitHub\ecephys_spike_sorting\ecephys_spike_sorting\scripts\full_from_kilosort.py "+session_name
   subprocess.check_output(command_string_2)
 
 

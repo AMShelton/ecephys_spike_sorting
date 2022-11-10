@@ -11,7 +11,7 @@ sorted_directories = [r'G:\766640955_412804_20181022_probeC_sorted\continuous\Ne
 probe_type = 'PXI'
 
 #json_directory = '/mnt/md0/data/json_files'
-json_directory = r'C:\Users\svc_neuropix\Documents\json_files'
+json_directory = r'C:\Users\andrew.shelton\Documents\json_files'
 
 for directory in sorted_directories:
 

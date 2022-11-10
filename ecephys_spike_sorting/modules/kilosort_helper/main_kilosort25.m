@@ -1,9 +1,9 @@
 %% you need to change most of the paths in this block
 
-addpath(genpath('C:\Users\svc_neuropix\Documents\GitHub\Kilosort')) % path to kilosort folder
-addpath(genpath('C:\Users\svc_neuropix\Documents\GitHub\npy-matlab')) % path to npy-matlab scripts
+addpath(genpath('C:\Users\andrew.shelton\Documents\GitHub\Kilosort')) % path to kilosort folder
+addpath(genpath('C:\Users\andrew.shelton\Documents\GitHub\npy-matlab')) % path to npy-matlab scripts
 
-pathToYourConfigFile = 'C:\Users\svc_neuropix\Documents\MATLAB'; % take from Github folder and put it somewhere else (together with the master_file)
+pathToYourConfigFile = 'C:\Users\andrew.shelton\Documents\MATLAB'; % take from Github folder and put it somewhere else (together with the master_file)
 rootZ       = ops.rootZ
 %rootZ = 'G:\Spikes\Sample'; % the raw data binary file is in this folder
 rootH = 'C:\data\temp'; % path to temporary binary file (same size as data, should be on fast SSD)

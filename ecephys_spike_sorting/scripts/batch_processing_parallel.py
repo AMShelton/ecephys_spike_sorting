@@ -56,7 +56,7 @@ def make_constants(session_name):
 	default_backup2 = os.path.join(r'\\sd5\sd5', session_name)
 	default_start = 'kilosort_helper'
 	default_end = 'primary_backup_processed_data'
-	json_directory = r'C:\Users\svc_neuropix\Documents\json_files'
+	json_directory = r'C:\Users\andrew.shelton\Documents\json_files'
 
 	npx_directories = OrderedDict()
 	npx_directories[os.path.join(r'J:', '757970808_412793_20180925_probeB')]=npx_params(default_start,default_end,r'\\sd4\SD4\757970808_412793_20180925\757970808_412793_20180925_probeB',r'\\sd4\SD4\757970808_412793_20180925\757970808_412793_20180925_probeB')

@@ -82,4 +82,4 @@ dependencies:
     - xarray==0.12.1
     - xmljson==0.2.1
     - zro==1.2.0+g15a7084.b70831
-prefix: C:\Users\svc_neuropix\.conda\envs\sorting
+prefix: C:\Users\andrew.shelton\.conda\envs\sorting

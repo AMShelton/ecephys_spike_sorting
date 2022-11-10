@@ -11,7 +11,7 @@ temp_data_path = r'D:\data\kilosort'
 
 probe_type = '3A'
 
-json_directory = r'C:\Users\svc_neuropix\Documents\json_files'
+json_directory = r'C:\Users\andrew.shelton\Documents\json_files'
 
 for directory in directories[:1]:
 

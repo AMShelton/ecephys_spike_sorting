@@ -104,8 +104,8 @@ def createInputJson(output_file,
         "extract_from_npx_params" : {
             "npx_directory": npx_directory,
             "settings_xml": settings_xml,
-            "npx_extractor_executable": r"C:\Users\svc_neuropix\Documents\GitHub\npxextractor\NpxExtractor\Release\NpxExtractor.exe",
-            "npx_extractor_repo": r"C:\Users\svc_neuropix\Documents\GitHub\npxextractor"
+            "npx_extractor_executable": r"C:\Users\andrew.shelton\Documents\GitHub\npxextractor\NpxExtractor\Release\NpxExtractor.exe",
+            "npx_extractor_repo": r"C:\Users\andrew.shelton\Documents\GitHub\npxextractor"
         },
 
         "depth_estimation_params" : {
@@ -127,14 +127,14 @@ def createInputJson(output_file,
         }, 
 
         "median_subtraction_params" : {
-            "median_subtraction_executable": "C:\\Users\\svc_neuropix\\Documents\\GitHub\\spikebandmediansubtraction\\Builds\\VisualStudio2013\\Release\\SpikeBandMedianSubtraction.exe",
-            "median_subtraction_repo": "C:\\Users\\svc_neuropix\\Documents\\GitHub\\spikebandmediansubtraction\\",
+            "median_subtraction_executable": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\spikebandmediansubtraction\\Builds\\VisualStudio2013\\Release\\SpikeBandMedianSubtraction.exe",
+            "median_subtraction_repo": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\spikebandmediansubtraction\\",
         },
 
         "kilosort_helper_params" : {
 
-            "matlab_home_directory": "C:\\Users\\svc_neuropix\\Documents\\MATLAB",
-            "kilosort_repository": "C:\\Users\\svc_neuropix\\Documents\\GitHub\\Kilosort",
+            "matlab_home_directory": "C:\\Users\\andrew.shelton\\Documents\\MATLAB",
+            "kilosort_repository": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\Kilosort",
             "kilosort_version" : 25,
             "surface_channel_buffer" : 15,
 

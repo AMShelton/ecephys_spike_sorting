@@ -4,7 +4,7 @@ from helpers.batch_processing_config import get_from_config, get_from_kwargs
 import sys
 
 
-session_name = '2053709239_532246_20200930'#test_2019-07-25_18-16-48' #Fill in with appropriate session name
+session_name = '2021-02-09_546513'#test_2019-07-25_18-16-48' #Fill in with appropriate session name
 probes_in = get_from_config('processable_probes')#['D', 'E', 'F']
 cortex_only = False
 

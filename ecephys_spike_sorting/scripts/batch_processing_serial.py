@@ -28,7 +28,7 @@ backup_drive = r'G:'
 
 ####################################################################
 
-json_directory = r'C:\Users\svc_neuropix\Documents\json_files'
+json_directory = r'C:\Users\andrew.shelton\Documents\json_files'
 
 def copy_processed_data_to_backup_drive(info):
 	print("Copying processed data to backup drive...")
