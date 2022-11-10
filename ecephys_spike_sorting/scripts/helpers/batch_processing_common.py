@@ -45,7 +45,7 @@ class processing_session():
 
     def __init__(self, session_name, probes_in, **kwargs):
         self.session_name = session_name
-        self.OEPHYS_v0_6_0 = get_from_kwargs('opephys_v0_6_0', kwargs, False)
+        self.sahar_sorted_data = get_from_kwargs('sahar_sorted_data', kwargs, False)
         # are we using oephys >= v0.6.0, with different folder structure? 
         # default to False, automatic check further on will update if it looks like a v0.6.0 recording
         self.probe_type = get_from_kwargs('probe_type', kwargs)
@@ -68,8 +68,8 @@ class processing_session():
 
         default_backup1 = os.path.join(get_from_kwargs('network_backup', kwargs), session_name)
         default_backup2 = get_from_kwargs('disk_backup', kwargs)
-        default_start = get_from_config('start_module', kwargs)
-        default_end = get_from_config('end_module', kwargs)
+        default_start = get_from_config('start_module', get_from_kwargs('start_module',kwargs))
+        default_end = get_from_config('end_module', get_from_kwargs('end_module',kwargs))
 
         slot_config = get_from_kwargs('slot_config', kwargs)
 

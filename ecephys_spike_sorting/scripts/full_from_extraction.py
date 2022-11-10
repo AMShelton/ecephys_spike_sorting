@@ -5,11 +5,12 @@ import sys
 
 
 session_name = '2021-02-09_546513'#test_2019-07-25_18-16-48' #Fill in with appropriate session name
-probes_in = get_from_config('processable_probes')#['D', 'E', 'F']
+probes_in = 'ABC'
 cortex_only = False
-
-start_module = get_from_config('start_module')
-end_module = get_from_config('end_module')
+probe_type = 'PXI'
+sahar_sorted_data = False
+start_module = 'extract_from_npx'
+end_module ='add_noise_class_to_metrics'
 
 #default_backup1 = os.path.join(get_from_config('network_backup', kwargs), session_name)
 #default_backup2 = get_from_config('disk_backup')
@@ -76,7 +77,9 @@ if __name__ == '__main__':
     copy_while_waiting_modules=copy_while_waiting_modules,
     final_copy_all_parallel=final_copy_all_parallel,
     start_module = start_module,
-    end_module = end_module
+    end_module = end_module,
+    sahar_sorted_data = sahar_sorted_data,
+    probe_type=probe_type,
     )
   processor.start_processing()
 
