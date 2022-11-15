@@ -620,7 +620,7 @@ class processing_session():
     def settings_path(self, slot_or_probe):
         raw_path = self.raw_path(slot_or_probe)
         possible_path = os.path.join(raw_path, 'settings*.xml')
-        if self.OEPHYS_v0_6_0:
+        if self.OEPHYS_v0_6_0 or self.sahar_sorted_data:
             path = glob.glob(os.path.join(raw_path,"**/*settings*.xml"), recursive=True)[0]
         else:
             path = glob.glob(possible_path)[0]
@@ -671,7 +671,7 @@ class processing_session():
         probe_list = self.probes_per_slot()[slot_p]
         dirname = self.raw_dirname(probe)+'_extracted'#+'_probe'+('').join(probe_list)
         path = os.path.join(self.sorted_drive(probe), dirname)
-        if self.OEPHYS_v0_6_0:
+        if self.OEPHYS_v0_6_0 or self.sahar_sorted_data:
             dirpath = self.raw_path(probe) # data are already "extracted"
             found = glob.glob(os.path.join(dirpath,"**/structure.oebin"), recursive=True)
             if len(found) > 1:                
