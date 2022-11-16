@@ -942,7 +942,7 @@ class processing_session():
                     print('There is not enough space on '+bdrive+' for all the data')
                     raise(E)
                 try:
-                    print('Checking wite permissions '+ bdrive)
+                    print('Checking write permissions '+ bdrive)
                     test_path = os.path.join(bdrive, 'test.txt')
                     with open(test_path, 'w') as f:
                         f.write('test write')
