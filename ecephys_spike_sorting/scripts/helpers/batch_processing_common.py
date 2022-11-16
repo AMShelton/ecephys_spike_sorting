@@ -1879,7 +1879,7 @@ class processing_session():
             try:    
                 for probe in self.probes:
                     for module, info in self.info_dict[probe].items():
-                        if info.rcode is not 0:
+                        if info.rcode != 0:
                             print("Module: ", module,",  Return Code: ", info.rcode)
                             print("Output: ", info.output)
                             print("Error: ", info.error)
@@ -1932,7 +1932,7 @@ class processing_session():
             for a_probe in self.probes:
                 nonzero_returncode_dict[a_probe] = {}
                 for module, info in json_compatible_info_dict[a_probe].items():
-                    if info['rcode'] is not 0:
+                    if info['rcode'] != 0:
                         nonzero_returncode_dict[a_probe][module]=info
             with open(path, "w") as write_file:
                 json.dump(nonzero_returncode_dict, write_file, indent=4)
