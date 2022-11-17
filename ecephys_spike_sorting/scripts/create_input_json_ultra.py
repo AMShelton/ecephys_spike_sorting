@@ -155,7 +155,7 @@ def createInputJsonUltra(output_file,
                 "spkTh": -6,
                 "whiteningRange": 256
             },
-            "kilosort_repository": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\KilosortUltra",
+            "kilosort_repository": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\Kilosort2",
             "kilosort_version": 99,
             "matlab_home_directory": "C:\\Users\\andrew.shelton\\Documents\\MATLAB",
             "surface_channel_buffer": 15

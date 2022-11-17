@@ -133,7 +133,7 @@ def createInputJsonKS3(output_file,
         "kilosort_helper_params" : {
 
             "matlab_home_directory": "C:\\Users\\andrew.shelton\\Documents\\MATLAB",
-            "kilosort_repository": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\kilosort3",
+            "kilosort_repository": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\Kilosort2",
             "kilosort_version" : 3,
             "surface_channel_buffer" : 15,
 
