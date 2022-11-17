@@ -34,7 +34,7 @@ def createInputJson(npx_directory, output_file, extracted_data_directory = None,
 	    "median_subtraction_repo": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\spikebandmediansubtraction\\",
 
 	    "kilosort_location": "C:\\Users\\andrew.shelton\\Documents\\MATLAB",
-	    "kilosort_repo": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\kilosort2",
+	    "kilosort_repo": "C:\\Users\\andrew.shelton\\Documents\\GitHub\\Kilosort",
 	    "kilosort_version" : 2,
 	    "surface_channel_buffer" : 15,
 
