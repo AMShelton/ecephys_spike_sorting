@@ -4,13 +4,13 @@ from helpers.batch_processing_config import get_from_config, get_from_kwargs
 import sys
 
 
-session_name = '2021-02-09_546513'#test_2019-07-25_18-16-48' #Fill in with appropriate session name
+session_name = '1200878248_623322_20220825'#test_2019-07-25_18-16-48' #Fill in with appropriate session name
 probes_in = 'ABC'
 cortex_only = False
 probe_type = 'PXI'
 sahar_sorted_data = False
 start_module = 'extract_from_npx'
-end_module ='add_noise_class_to_metrics'
+end_module ='copy_logs'
 
 #default_backup1 = os.path.join(get_from_config('network_backup', kwargs), session_name)
 #default_backup2 = get_from_config('disk_backup')

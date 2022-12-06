@@ -1,29 +1,30 @@
 from collections import namedtuple, OrderedDict
 
 config = {
-    'processable_probes': ['D','E','F'],#, 'B', 'C', 'D', 'E'],# 'B', 'C', 'D', 'E', 'F'],#'B','C'],
-	'probe_type': 'PXI', #Use PXI here for 1.0 probes, 'Ultra' for ultra probes
+	'processable_probes':'ABCDEF',
+	# 'probe_type': 'PXI', #Use PXI here for 1.0 probes, 'Ultra' for ultra probes
     'acq_system': 'PXI',
-	'WSE_computer': 'W10DTSM18306',
+	# 'sahar_sorted_data': False,
+	'WSE_computer': 'W10DT713931',
     'probe_params': namedtuple('probe_params',['probe_letter', 'pxi_slot', 'num_in_slot', 'session','start_module','end_module','backup1','backup2']),
     'slot_params': namedtuple('slot_params',['slot_num', 'recording_dir', 'extracted_drive','backup1','backup2']),
-    'lims_upload_drive': r'C:\data\temp', 
-    'processing_drive': r'C:\data\extraction',#r'\\10.128.54.20\sd8.3\1128517077_565581_20210915', #r'C:\data\extraction',
+    'lims_upload_drive': r'D:', 
+    'processing_drive': r'A:',#r'\\10.128.54.20\sd8.3\1128517077_565581_20210915', #r'C:\data\extraction',
     'disk_backup': r'D:',
-    'network_backup': r'\\allen\programs\mindscope\workgroups\np-exp', #r"C:\Users\svc_neuropix\Desktop\1128517077_565581_20210915_quality_metrics", #r\\10.128.54.19\sd9,
+    'network_backup': r'D:', #r"C:\Users\andrew.shelton\Desktop\1128517077_565581_20210915_quality_metrics", #r\\10.128.54.19\sd9,
     'start_module': 'extract_from_npx',
-    'end_module': 'cleanup', # 'final_copy_parallel', #'cleanup',
+    'end_module': 'copy_logs', # 'final_copy_parallel', #'cleanup',
     'json_directory': r'C:\Users\andrew.shelton\Documents\json_files',
     'ctx_surface_min': 80,
     'ctx_surface_max': 240,
     'slot_config':{
     	2:{
     		'acq_drive':  r'\\W10DT713931\A',
-    		'suffix': 'probeABC',
+    		'suffix': 'probeABC', #change this depending on the probe configuration
     	},
     	3:{
     		'acq_drive': r'\\W10DT713931\B',
-    		'suffix': 'probeDEF',
+    		'suffix': 'probeDEF', #change this depending on the probe configuration
     	},
         # 2:{
         #     'acq_drive': r'C:\data',

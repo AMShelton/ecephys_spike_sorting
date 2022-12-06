@@ -5,48 +5,47 @@
 #from qtpy import QtGui, QtCore
 #from qtpy.QtWidgets import *
 
-import subprocess
-import glob
-import shutil
-import os
-import time
-import psutil
-from collections import namedtuple, OrderedDict
-from pprint import pprint
-from recordclass import recordclass
 import datetime
+import glob
+import json
 import logging
 #from qtpy import QtGui, QtCore
 import multiprocessing
-import json
-import xml.etree.ElementTree as ET
-import pandas as pd
-import numpy as np
-import pdb
+import os
 import pathlib
+import pdb
+import shutil
+import subprocess
+import time
+import xml.etree.ElementTree as ET
+from collections import OrderedDict, namedtuple
+from pprint import pprint
+
+import numpy as np
+import pandas as pd
+import psutil
+from recordclass import recordclass
+
 logging.basicConfig(level = logging.INFO)
         
-
-from helpers.check_data_processing import check_data_processing, check_all_space
-from helpers.batch_processing_config import get_from_config, get_from_kwargs
 
 #import helpers.processing as npxprocess
 from create_input_json import createInputJson as createInputJson_KS2
 from create_input_json_ultra import createInputJsonUltra
+from helpers.batch_processing_config import get_from_config, get_from_kwargs
+from helpers.check_data_processing import (check_all_space,
+                                           check_data_processing)
+
 # from zro import RemoteObject, Proxy # unused - not installed on sorting pc (sorting conda env)
 
 
-session = '2021-02-09_546513'
-probes_in = ['A', 'B', 'C', 'D', 'E', 'F']
-probe_type = 'PXI'
-acq_system = 'PXI'
 class processing_session():
 
 
     def __init__(self, session_name, probes_in, **kwargs):
         self.session_name = session_name
         self.sahar_sorted_data = get_from_kwargs('sahar_sorted_data', kwargs, False)
-        self.OEPHYS_v0_6_0  = get_from_kwargs('OEPHYS_v0_6_0',kwargs,False)
+        # self.OEPHYS_v0_6_0 = get_from_kwargs('OEPHYS_v0_6_0', kwargs, False)
         # are we using oephys >= v0.6.0, with different folder structure? 
         # default to False, automatic check further on will update if it looks like a v0.6.0 recording
         self.probe_type = get_from_kwargs('probe_type', kwargs)
@@ -69,8 +68,8 @@ class processing_session():
 
         default_backup1 = os.path.join(get_from_kwargs('network_backup', kwargs), session_name)
         default_backup2 = get_from_kwargs('disk_backup', kwargs)
-        default_start = get_from_config('start_module', kwargs)
-        default_end = get_from_config('end_module', kwargs)
+        default_start = get_from_config('start_module', get_from_kwargs('start_module',kwargs))
+        default_end = get_from_config('end_module', get_from_kwargs('end_module',kwargs))
 
         slot_config = get_from_kwargs('slot_config', kwargs)
 
@@ -105,19 +104,26 @@ class processing_session():
         #         print(f"not found {try_short_dir_path} or {try_dir_path}")
         #         raise FileNotFoundError
         
+        # determine if we have v0.6.0 data (no npx2) + folder structure (addtl subfolders)
         for v in pxi_slots.values():
             
             # check whether we have npx2 files in the session directory - an indicator of older ephys version
-            data_dirpath = v[1] # recording_dir
-            if not os.path.exists(data_dirpath):
+            data_dirpath = pathlib.Path(v[1]) # recording_dir
+            if not data_dirpath.exists():
+                # we may not have a '_probeABC' suffix where we need one - add it if necessary
+                try_short_dir_path = pathlib.Path(data_dirpath).parent / session_name
+                if try_short_dir_path.exists():
+                    shutil.move(str(try_short_dir_path), data_dirpath)
+                # if not try_short_dir_path.exists(): # re-check after the rename                
+                #     raise FileNotFoundError(f"not found {try_short_dir_path} or {data_dirpath}")
+            if not data_dirpath.exists():
                 continue
             if (
-                not glob.glob(os.path.join(data_dirpath,"**/*.npx2"), recursive=True)
-                and glob.glob(os.path.join(data_dirpath,"**/*.oebin"), recursive=True)
-                and not self.sahar_sorted_data
+                not list(data_dirpath.rglob("**/*.npx2"))
+                and list(data_dirpath.rglob("**/*.oebin"))
             ):
                 print("open ephys raw data is uncompressed format from v0.6.x or later")
-                self.OEPHYS_v0_6_0 = True
+                self.OEPHYS_v0_6_0 = True 
                 break
             self.OEPHYS_v0_6_0 = False
             
@@ -330,176 +336,206 @@ class processing_session():
         dest_dir = pathlib.Path(self.pxi_slots[pxi_str].extracted_drive , self.session_name)
         
         def move(src,dest):
-            if not pathlib.Path(dest).parent.exists():
-                pathlib.Path(dest).parent.mkdir(parents=True,exist_ok=True)
+            src = pathlib.Path(src)
+            dest = pathlib.Path(dest)
+            if not dest.parent.exists():
+                dest.parent.mkdir(parents=True,exist_ok=True)
+            if (dest.exists() 
+                and src.stat().st_size == dest.stat().st_size
+                and src.stat().st_mtime == dest.stat().st_mtime
+            ):
+                return
             shutil.copy2(str(src),str(dest)) 
+
+        def get_dir_size(path) -> int:
+            root_directory = pathlib.Path(path).parent if os.path.isfile(path) else pathlib.Path(path)
+            return sum(f.stat().st_size for f in root_directory.glob('**/*') if f.is_file())
         
+        probe_config = get_from_kwargs('probe_config',[])
+        
+        space_required = 0
+        pxi_slots = {probe_config[probe]['pxi_slot'] for probe in probes_in}
+        for raw_dir in [self.pxi_slots[slot][1] for slot in pxi_slots]:
+            print(raw_dir)
+            space_required += get_dir_size(raw_dir)
+        processing_drive = get_from_config('processing_drive','D:')
+        if space_required > psutil.disk_usage(processing_drive).free:
+            raise OSError(f'Not enough space to copy {space_required /1024**3 :.1f} GB to {processing_drive}') from None
+        else:
+            print(f'Enough space to copy {space_required /1024**3 :.1f} GB to {processing_drive}')       
+
         for index, probe_letter in enumerate(probes_in):
             probe_ap_index = index*2
             probe_lfp_index = probe_ap_index+1
+   
+            print(f"copying Sahar's pre-sorted probe{probe_letter} data...")
 
-            try:    
-                print(f"copying v0.6.0 probe{probe_letter} data...")
+            rec_root = pathlib.Path(rec_root)
+            if not rec_root.exists():
+                raise FileNotFoundError(f'{rec_root}')
 
-                rec_root = pathlib.Path(rec_root)
-                if not rec_root.exists():
-                    raise FileNotFoundError(f'{rec_root}')
+            probe_folder = list((rec_root / 'continuous').glob(f'Neuropix-PXI-1*.{probe_ap_index}'))
+            if len(probe_folder) > 1:
+                raise ValueError(f'multiple probe folders exist: {probe_folder}')
+            if len(probe_folder) == 0:
+                probe_folder = list((rec_root / 'continuous').glob(f'Neuropix-PXI-1*.{probe_letter}'))
+            if len(probe_folder) == 0:
+                raise ValueError(f'no probe folders exist: {probe_ap_index} {rec_root}')
+            
+            continuous_ap_probe_folder = probe_folder[0] 
+            continuous_lfp_probe_folder = pathlib.Path(str(continuous_ap_probe_folder).replace(f'.{probe_ap_index}',f'.{probe_lfp_index}'))
+            
+            events_probe_folder = list(pathlib.Path(str(continuous_ap_probe_folder).replace('continuous','events')).glob('TTL_*'))
+            if len(events_probe_folder) > 1:
+                raise ValueError(f'multiple probe folders exist: {events_probe_folder}')
+            if len(events_probe_folder) == 0:
+                raise ValueError(f"no ttl folders exist: {pathlib.Path(str(continuous_ap_probe_folder).replace('continuous','events'))}")
+            events_probe_folder = events_probe_folder[0]
 
-                probe_folder = list((rec_root / 'continuous').glob(f'Neuropix-PXI-1*.{probe_ap_index}'))
-                if len(probe_folder) > 1:
-                    raise ValueError(f'multiple probe folders exist: {probe_folder}')
-                if len(probe_folder) == 0:
-                    probe_folder = list((rec_root / 'continuous').glob(f'Neuropix-PXI-1*.{probe_letter}'))
-                if len(probe_folder) == 0:
-                    raise ValueError(f'no probe folders exist: {probe_ap_index} {rec_root}')
-                
-                continuous_ap_probe_folder = probe_folder[0] 
-                continuous_lfp_probe_folder = pathlib.Path(str(continuous_ap_probe_folder).replace(f'.{probe_ap_index}',f'.{probe_lfp_index}'))
-                
-                events_probe_folder = list(pathlib.Path(str(continuous_ap_probe_folder).replace('continuous','events')).glob('TTL_*'))
-                if len(events_probe_folder) > 1:
-                    raise ValueError(f'multiple probe folders exist: {events_probe_folder}')
-                if len(events_probe_folder) == 0:
-                    raise ValueError(f"no ttl folders exist: {pathlib.Path(str(continuous_ap_probe_folder).replace('continuous','events'))}")
-                events_probe_folder = events_probe_folder[0]
+            src = continuous_ap_probe_folder / "continuous.dat"
+            dest= Rf"{dest_dir}_probe{probe_letter}_sorted\continuous\Neuropix-PXI-100.0\continuous.dat"
+            move(src,dest) 
 
-                src = continuous_ap_probe_folder / "continuous.dat"
-                dest= Rf"{dest_dir}_probe{probe_letter}_sorted\continuous\Neuropix-PXI-100.0\continuous.dat"
-                move(src,dest) 
+            src= rec_root / "timestamps.npy"
+            dest= fR"{dest_dir}_probe{probe_letter}_sorted\continuous\Neuropix-PXI-100.0\ap_timestamps.npy"
+            move(src,dest)
 
-                src= rec_root / "timestamps.npy"
-                dest= fR"{dest_dir}_probe{probe_letter}_sorted\continuous\Neuropix-PXI-100.0\ap_timestamps.npy"
-                move(src,dest)
+            src= continuous_lfp_probe_folder / "continuous.dat"
+            dest= fR"{dest_dir}_probe{probe_letter}_sorted\continuous\Neuropix-PXI-100.1\continuous.dat"
+            move(src,dest)
+            src= continuous_lfp_probe_folder / "timestamps.npy"
+            dest= fR"{dest_dir}_probe{probe_letter}_sorted\continuous\Neuropix-PXI-100.1\lfp_timestamps.npy"
+            move(src,dest)
 
-                src= continuous_lfp_probe_folder / "continuous.dat"
-                dest= fR"{dest_dir}_probe{probe_letter}_sorted\continuous\Neuropix-PXI-100.1\continuous.dat"
-                move(src,dest)
-                src= continuous_lfp_probe_folder / "timestamps.npy"
-                dest= fR"{dest_dir}_probe{probe_letter}_sorted\continuous\Neuropix-PXI-100.1\lfp_timestamps.npy"
-                move(src,dest)
+            src= events_probe_folder / "timestamps.npy"
+            dest= fR"{dest_dir}_probe{probe_letter}_sorted\events\Neuropix-PXI-100.0\TTL_1\event_timestamps.npy"
+            move(src,dest)
 
-                src= events_probe_folder / "timestamps.npy"
-                dest= fR"{dest_dir}_probe{probe_letter}_sorted\events\Neuropix-PXI-100.0\TTL_1\event_timestamps.npy"
-                move(src,dest)
-                
-                try:
-                    # adjust the events sample_numbers AKA event_timestamps
-                    # see https://gist.github.com/bjhardcastle/e972d59f482a549f312047221cd8eccb
-                    file = rec_root / "sync_messages.txt"
-                    with open(file, 'r') as f:
-                        lines = f.readlines()
-                    
-                    first_sample = int(lines[index*2 + 1].split('start time: ')[-1].split('@30')[0].rstrip())
-                    
-                    file = fR"{dest_dir}_probe{probe_letter}_sorted\events\Neuropix-PXI-100.0\TTL_1\event_timestamps.npy"
-                    with open(file,'rb') as f:
-                        event_timestamps = np.load(f)
-                        
-                    event_timestamps -= first_sample
-                    with open(file,'wb') as f:
-                        np.save(f, event_timestamps)
-                except (IndexError, FileNotFoundError) as e:
-                    print(f'sync_messages missing or empty - but we don\'t actually need it: {file}')
+            try:
+                # adjust the events sample_numbers AKA event_timestamps
+                # see https://gist.github.com/bjhardcastle/e972d59f482a549f312047221cd8eccb
+                file = rec_root / "sync_messages.txt"
+                with open(file, 'r') as f:
+                    lines = f.readlines()
+    
+                first_sample = int(lines[index*2 + 1].split('start time: ')[-1].split('@30')[0].rstrip())
+    
+                file = fR"{dest_dir}_probe{probe_letter}_sorted\events\Neuropix-PXI-100.0\TTL_1\event_timestamps.npy"
+                with open(file,'rb') as f:
+                    event_timestamps = np.load(f)
+    
+                event_timestamps -= first_sample
+                with open(file,'wb') as f:
+                    np.save(f, event_timestamps)
+            except (IndexError, FileNotFoundError) as e:
+                print(f'sync_messages missing or empty - but we don\'t actually need it: {file}')
 
-                src= events_probe_folder  / "channel_states.npy"
-                dest= fR"{dest_dir}_probe{probe_letter}_sorted\events\Neuropix-PXI-100.0\TTL_1\channel_states.npy"
-                move(src,dest)
-                
-                src= events_probe_folder  / "timestamps.npy"
-                dest= fR"{dest_dir}_probe{probe_letter}_sorted\events\Neuropix-PXI-100.0\TTL_1\event_timestamps.npy"
-                move(src,dest)
+            src= events_probe_folder  / "channel_states.npy"
+            dest= fR"{dest_dir}_probe{probe_letter}_sorted\events\Neuropix-PXI-100.0\TTL_1\channel_states.npy"
+            move(src,dest)
+            
+            src= events_probe_folder  / "timestamps.npy"
+            dest= fR"{dest_dir}_probe{probe_letter}_sorted\events\Neuropix-PXI-100.0\TTL_1\event_timestamps.npy"
+            move(src,dest)
 
-                # src= fR"{rec_root}\events\Neuropix-PXI-100.Probe{probe}-AP\TTL\sample_numbers.npy"
-                # dest= fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\sample_numbers.npy"
-                # move(src,dest)
-                src= events_probe_folder / "full_words.npy"
-                dest= fR"{dest_dir}_probe{probe_letter}_sorted\events\Neuropix-PXI-100.0\TTL_1\full_words.npy"
-                move(src,dest)
+            # src= fR"{rec_root}\events\Neuropix-PXI-100.Probe{probe}-AP\TTL\sample_numbers.npy"
+            # dest= fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\sample_numbers.npy"
+            # move(src,dest)
+            src= events_probe_folder / "full_words.npy"
+            dest= fR"{dest_dir}_probe{probe_letter}_sorted\events\Neuropix-PXI-100.0\TTL_1\full_words.npy"
+            move(src,dest)
 
-                finished = True
-            except Exception as e:
-                print(e)
-                logging.error(f"failed to copy v0.6.0 files to sorted folders for probe{probe_letter}", exc_info=True)
-                finished = False
+            finished = True
         return finished     
     
     def copy_v0_6_0_to_sorted_folder_structure(self,probes_in):
         finished = False
         
-        if set(probes_in).intersection({"A","B","C"}):
-            pxi_str = '2'
-        elif set(probes_in).intersection({"D","E","F"}):
-            pxi_str ='3'
-        
-        dirpath = self.pxi_slots[pxi_str][1]
-            
-        found = glob.glob(os.path.join(dirpath,"**/structure.oebin"), recursive=True)
-        if len(found) > 1:                
-            dir_size = []
-            for idx, dir in enumerate(found):
-                root_directory = os.path.dirname(dir)
-                dir_size.append(sum(f.stat().st_size for f in pathlib.Path(root_directory).glob('**/*') if pathlib.Path(f).is_file()))
-            max_size_idx = dir_size.index(max(dir_size))    
-        else:
-            max_size_idx = 0
-            
-        rec_root = os.path.dirname(found[max_size_idx])
-        dest_dir = pathlib.Path(self.pxi_slots[pxi_str].extracted_drive , self.session_name)
-        
         def move(src,dest):
-            if not pathlib.Path(dest).parent.exists():
-                pathlib.Path(dest).parent.mkdir(parents=True,exist_ok=True)
-            shutil.copy2(src,dest) 
+            src = pathlib.Path(src)
+            dest = pathlib.Path(dest)
+            if not dest.parent.exists():
+                dest.parent.mkdir(parents=True,exist_ok=True)
+            if (dest.exists() 
+                and src.stat().st_size == dest.stat().st_size
+                and src.stat().st_mtime == dest.stat().st_mtime
+            ):
+                return
+            shutil.copy2(str(src),str(dest)) 
+            
+        def get_dir_size(path) -> int:
+            root_directory = pathlib.Path(path).parent if os.path.isfile(path) else pathlib.Path(path)
+            return sum(f.stat().st_size for f in root_directory.glob('**/*') if f.is_file())
+        
+        probe_config = get_from_kwargs('probe_config',[])
+        
+        space_required = 0
+        pxi_slots = {probe_config[probe]['pxi_slot'] for probe in probes_in}
+        for raw_dir in [self.pxi_slots[slot][1] for slot in pxi_slots]:
+            print(raw_dir)
+            space_required += get_dir_size(raw_dir)
+        processing_drive = get_from_config('processing_drive','D:')
+        if space_required > psutil.disk_usage(processing_drive).free:
+            print(f'Not enough space to copy {space_required /1024**3 :.1f} GB to {processing_drive}')
+        else:
+            print(f'Enough space to copy {space_required /1024**3 :.1f} GB to {processing_drive}')
         
         for probe in probes_in:
-            try:    
-                print(f"copying v0.6.0 probe{probe} data...")
-                src = Rf"{rec_root}\continuous\Neuropix-PXI-100.Probe{probe}-AP\continuous.dat"
-                dest= Rf"{dest_dir}_probe{probe}_sorted\continuous\Neuropix-PXI-100.0\continuous.dat"
-                move(src,dest) 
-                src= fR"{rec_root}\continuous\Neuropix-PXI-100.Probe{probe}-AP\timestamps.npy"
-                dest= fR"{dest_dir}_probe{probe}_sorted\continuous\Neuropix-PXI-100.0\ap_timestamps.npy"
-                move(src,dest)
-                src= fR"{rec_root}\continuous\Neuropix-PXI-100.Probe{probe}-LFP\continuous.dat"
-                dest= fR"{dest_dir}_probe{probe}_sorted\continuous\Neuropix-PXI-100.1\continuous.dat"
-                move(src,dest)
-                src= fR"{rec_root}\continuous\Neuropix-PXI-100.Probe{probe}-LFP\timestamps.npy"
-                dest= fR"{dest_dir}_probe{probe}_sorted\continuous\Neuropix-PXI-100.1\lfp_timestamps.npy"
-                move(src,dest)
-                src= fR"{rec_root}\events\Neuropix-PXI-100.Probe{probe}-AP\TTL\states.npy"
-                dest= fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\channel_states.npy"
-                move(src,dest)
-                src= fR"{rec_root}\events\Neuropix-PXI-100.Probe{probe}-AP\TTL\sample_numbers.npy"
-                dest= fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\event_timestamps.npy"
-                move(src,dest)
-                
-                # adjust the events sample_numbers AKA event_timestamps
-                # see https://gist.github.com/bjhardcastle/e972d59f482a549f312047221cd8eccb
-                file = fR"{rec_root}\continuous\Neuropix-PXI-100.Probe{probe}-AP\sample_numbers.npy"
-                continuous_sample_numbers = np.load(file,mmap_mode='r')
-                first_sample = continuous_sample_numbers[0]
-                
-                file = fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\event_timestamps.npy"
-                with open(file,'rb') as f:
-                    event_timestamps = np.load(f)
-                    
-                event_timestamps -= first_sample
-                with open(file,'wb') as f:
-                    np.save(f, event_timestamps)
+            pxi_str = probe_config[probe]['pxi_slot']
+            dirpath = self.pxi_slots[pxi_str][1]
+            found = glob.glob(os.path.join(dirpath,"**/structure.oebin"), recursive=True)
+            if len(found) > 1:
+                dir_sizes = [get_dir_size(path) for path in found]
+                max_size_idx = dir_sizes.index(max(dir_sizes))    
+            else:
+                max_size_idx = 0
+            rec_root = os.path.dirname(found[max_size_idx])
+            dest_dir = pathlib.Path(self.pxi_slots[pxi_str].extracted_drive , self.session_name)    
 
-                src= fR"{rec_root}\events\Neuropix-PXI-100.Probe{probe}-AP\TTL\sample_numbers.npy"
-                dest= fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\sample_numbers.npy"
-                move(src,dest)
-                src= fR"{rec_root}\events\Neuropix-PXI-100.Probe{probe}-AP\TTL\full_words.npy"
-                dest= fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\full_words.npy"
-                move(src,dest)
-                finished = True
-            except Exception as e:
-                print(e)
-                logging.error(f"failed to copy v0.6.0 files to sorted folders for probe{probe}", exc_info=True)
-                finished = False
+        
+            print(f"copying v0.6.0 probe{probe} data...")
+            src = Rf"{rec_root}\continuous\Neuropix-PXI-100.Probe{probe}-AP\continuous.dat"
+            dest= Rf"{dest_dir}_probe{probe}_sorted\continuous\Neuropix-PXI-100.0\continuous.dat"
+            move(src,dest)
+            src= fR"{rec_root}\continuous\Neuropix-PXI-100.Probe{probe}-AP\timestamps.npy"
+            dest= fR"{dest_dir}_probe{probe}_sorted\continuous\Neuropix-PXI-100.0\ap_timestamps.npy"
+            move(src,dest)
+            src= fR"{rec_root}\continuous\Neuropix-PXI-100.Probe{probe}-LFP\continuous.dat"
+            dest= fR"{dest_dir}_probe{probe}_sorted\continuous\Neuropix-PXI-100.1\continuous.dat"
+            move(src,dest)
+            src= fR"{rec_root}\continuous\Neuropix-PXI-100.Probe{probe}-LFP\timestamps.npy"
+            dest= fR"{dest_dir}_probe{probe}_sorted\continuous\Neuropix-PXI-100.1\lfp_timestamps.npy"
+            move(src,dest)
+            src= fR"{rec_root}\events\Neuropix-PXI-100.Probe{probe}-AP\TTL\states.npy"
+            dest= fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\channel_states.npy"
+            move(src,dest)
+            src= fR"{rec_root}\events\Neuropix-PXI-100.Probe{probe}-AP\TTL\sample_numbers.npy"
+            dest= fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\event_timestamps.npy"
+            move(src,dest)
+            
+            # adjust the events sample_numbers AKA event_timestamps
+            # see https://gist.github.com/bjhardcastle/e972d59f482a549f312047221cd8eccb
+            file = fR"{rec_root}\continuous\Neuropix-PXI-100.Probe{probe}-AP\sample_numbers.npy"
+            continuous_sample_numbers = np.load(file,mmap_mode='r')
+            first_sample = continuous_sample_numbers[0]
+            
+            file = fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\event_timestamps.npy"
+            with open(file,'rb') as f:
+                event_timestamps = np.load(f)
+                
+            event_timestamps -= first_sample
+            with open(file,'wb') as f:
+                np.save(f, event_timestamps)
+
+            src= fR"{rec_root}\events\Neuropix-PXI-100.Probe{probe}-AP\TTL\sample_numbers.npy"
+            dest= fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\sample_numbers.npy"
+            move(src,dest)
+            src= fR"{rec_root}\events\Neuropix-PXI-100.Probe{probe}-AP\TTL\full_words.npy"
+            dest= fR"{dest_dir}_probe{probe}_sorted\events\Neuropix-PXI-100.0\TTL_1\full_words.npy"
+            move(src,dest)
+            finished = True
+
         return finished     
-     
     
     def create_file_handler(self, level_string,level_idx,limsID,probe):
         file_name = limsID+'_'+datetime.datetime.now().strftime("%y.%m.%d.%I.%M.%S")+'_'+level_string+'_'+probe+".log"
@@ -588,7 +624,7 @@ class processing_session():
     def settings_path(self, slot_or_probe):
         raw_path = self.raw_path(slot_or_probe)
         possible_path = os.path.join(raw_path, 'settings*.xml')
-        if self.OEPHYS_v0_6_0:
+        if self.OEPHYS_v0_6_0 or self.sahar_sorted_data:
             path = glob.glob(os.path.join(raw_path,"**/*settings*.xml"), recursive=True)[0]
         else:
             path = glob.glob(possible_path)[0]
@@ -617,7 +653,7 @@ class processing_session():
         return drive 
 
     def sorted_path(self, probe):
-        path = os.path.join(self.sorted_drive(probe), self.sorted_dirname(probe))
+        path = os.path.join(self.sorted_drive(probe)+'\\', self.sorted_dirname(probe))
         return path
 
                 
@@ -910,7 +946,7 @@ class processing_session():
                     print('There is not enough space on '+bdrive+' for all the data')
                     raise(E)
                 try:
-                    print('Checking wite permissions '+ bdrive)
+                    print('Checking write permissions '+ bdrive)
                     test_path = os.path.join(bdrive, 'test.txt')
                     with open(test_path, 'w') as f:
                         f.write('test write')
@@ -1545,7 +1581,7 @@ class processing_session():
                 probe_info = probe_json['probe']
             else:
                 probe_info = {
-                    "phase" : "3a", 
+                    "phase" : "1.0", 
                     "ap gain" : get_settings_xml_value(probe, probe_element, 'apGainValue',"500x"),
                     "lfp gain" : get_settings_xml_value(probe, probe_element, 'lfpGainValue',"250x"),
                     "reference channel" : get_settings_xml_value(probe, probe_element, 'referenceChannel',"Ext"),
@@ -1557,14 +1593,14 @@ class processing_session():
 
                     "subprocessors" :[
                         {
-                            "name" : "Neuropix-3a-100.0",
+                            "name" : "Neuropix-PXI-100.0",
                             "type" : "AP band",
                             "num channels" : 384,
                             "sample_rate" : 30000.0,
                             "bit volts" : 0.195
                         },
                         {
-                            "name" : "Neuropix-3a-100.1",
+                            "name" : "Neuropix-PXI-100.1",
                             "type" : "LFP band",
                             "num channels" : 384,
                             "sample_rate" : 2500.0,
@@ -1573,6 +1609,14 @@ class processing_session():
                     ]
 
                 }  
+            
+            probe_ref_channels_dict = {
+                "3a": [36, 75, 112, 151, 188, 227, 264, 303, 340, 379],
+                "1.0": [191],
+                "ultra": [191],
+            }
+            probe_info['reference_channels'] = probe_ref_channels_dict.get(self.probe_type.lower(),[])
+            
             #print(software_info, probe_info )
             return software_info, probe_info             
 
@@ -1839,7 +1883,7 @@ class processing_session():
             try:    
                 for probe in self.probes:
                     for module, info in self.info_dict[probe].items():
-                        if info.rcode is not 0:
+                        if info.rcode != 0:
                             print("Module: ", module,",  Return Code: ", info.rcode)
                             print("Output: ", info.output)
                             print("Error: ", info.error)
@@ -1892,7 +1936,7 @@ class processing_session():
             for a_probe in self.probes:
                 nonzero_returncode_dict[a_probe] = {}
                 for module, info in json_compatible_info_dict[a_probe].items():
-                    if info['rcode'] is not 0:
+                    if info['rcode'] != 0:
                         nonzero_returncode_dict[a_probe][module]=info
             with open(path, "w") as write_file:
                 json.dump(nonzero_returncode_dict, write_file, indent=4)
